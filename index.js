@@ -73,11 +73,11 @@ var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRAT
 		var prefix = Exporter.config('prefix');
 		var query = 'SELECT '
 			+ '\n' +  prefix + 'membergroups.id_group as _gid, '
-			+ '\n' +  prefix + 'membergroups.group_name as _name, '
-			+ '\n' +  prefix + 'membergroups.description as _description, '
-			+ '\n' +  prefix + 'membergroups.hidden as _hidden '
+			+ '\n' +  prefix + 'membergroups.groupName as _name '
 			+ '\n' +  'FROM ' + prefix + 'membergroups '
 			+ '\n' + (start >= 0 && limit >= 0 ? ' LIMIT ' + start + ',' + limit : '');
+
+		Exporter.log('query: ' + query);
 
 
 		if (!Exporter.connection) {
@@ -112,27 +112,29 @@ var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRAT
 		var err;
 		var prefix = Exporter.config('prefix');
 		var query = 'SELECT '
-			+ '\n' + prefix + 'members.id_member as _uid, '
-			+ '\n' + prefix + 'members.member_name as _username, '
-			+ '\n' + prefix + 'members.email_address as _email, '
-			+ '\n' + prefix + 'members.real_name as _alternativeUsername, '
+			+ '\n' + prefix + 'members.ID_MEMBER as _uid, '
+			+ '\n' + prefix + 'members.memberName as _username, '
+			+ '\n' + prefix + 'members.emailAddress as _email, '
+			+ '\n' + prefix + 'members.realName as _alternativeUsername, '
 			+ '\n' + prefix + 'members.signature as _signature, '
-			+ '\n' + '(' + prefix + 'members.last_login * 1000) as _lastonline, '
-			+ '\n' + '(' + prefix + 'members.date_registered * 1000) as _joindate , '
+			+ '\n' + '(' + prefix + 'members.lastLogin * 1000) as _lastonline, '
+			+ '\n' + '(' + prefix + 'members.dateRegistered * 1000) as _joindate , '
 			+ '\n' + prefix + 'members.location as _location, '
 			+ '\n' + prefix + 'members.birthdate as _birthday, '
-			+ '\n' + prefix + 'members.website_url as _website, '
+			+ '\n' + prefix + 'members.websiteUrl as _website, '
 			+ '\n CONCAT("/assets/uploads/_imported_profiles/avatars/", ' + prefix + 'attachments.filename) AS _picture, '
-			+ '\n CONCAT(' + prefix + 'members.id_group, \',\', ' + prefix + 'members.additional_groups) AS _groups, '
-			+ '\n' + prefix + 'membergroups.group_name as _level, '
+			+ '\n CONCAT(' + prefix + 'members.ID_GROUP, \',\', ' + prefix + 'members.additionalGroups) AS _groups, '
+			+ '\n' + prefix + 'membergroups.groupName as _level, '
 			+ '\n (' + prefix + 'ban_groups.cannot_access + ' + prefix + 'ban_groups.cannot_register + ' + prefix + 'ban_groups.cannot_post + ' + prefix + 'ban_groups.cannot_login) > 0 as _banned '
 			+ '\n' + 'FROM ' + prefix + 'members '
 			+ '\n' + 'LEFT JOIN ' + prefix + 'membergroups ON ' + prefix + 'membergroups.id_group = ' + prefix + 'members.id_group '
-			+ '\n' + 'LEFT JOIN ' + prefix + 'ban_groups ON ' + prefix + 'ban_groups.name = ' + prefix + 'members.member_name '
+			+ '\n' + 'LEFT JOIN ' + prefix + 'ban_groups ON ' + prefix + 'ban_groups.name = ' + prefix + 'members.memberName '
 			+ '\n' + 'LEFT JOIN ' + prefix + 'attachments ON ' + prefix + 'attachments.id_member = ' + prefix + 'members.id_member '
 			+ '\n' + 'WHERE ' + prefix + 'members.id_member = ' + prefix + 'members.id_member '
 			+ '\n' + 'ORDER BY ' + prefix + 'members.id_member '
 			+ '\n' + (start >= 0 && limit >= 0 ? ' LIMIT ' + start + ',' + limit : '');
+
+		Exporter.log('query: ' + query);
 
 		if (!Exporter.connection) {
 			err = {error: 'MySQL connection is not setup. Run setup(config) first'};
@@ -183,10 +185,11 @@ var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRAT
 			+ '\n' +  prefix + 'boards.id_parent as _parentCid, '
 			+ '\n' +  prefix + 'boards.name as _name, '
 			+ '\n' +  prefix + 'boards.description as _description, '
-			+ '\n' +  prefix + 'boards.board_order as _order '
+			+ '\n' +  prefix + 'boards.boardOrder as _order '
 			+ '\n' +  'FROM ' + prefix + 'boards '
 			+ '\n' + (start >= 0 && limit >= 0 ? ' LIMIT ' + start + ',' + limit : '');
 
+		Exporter.log('query: ' + query);
 
 		if (!Exporter.connection) {
 			err = {error: 'MySQL connection is not setup. Run setup(config) first'};
@@ -230,6 +233,8 @@ var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRAT
 			+ '\n' +  'FROM ' + prefix + 'personal_messages '
 			+ '\n' + 'JOIN ' + prefix + 'pm_recipients ON ' + prefix + 'pm_recipients.id_pm = ' + prefix + 'personal_messages.id_pm '
 			+ '\n' + (start >= 0 && limit >= 0 ? ' LIMIT ' + start + ',' + limit : '');
+
+		Exporter.log('query: ' + query);
 
 		if (!Exporter.connection) {
 			err = {error: 'MySQL connection is not setup. Run setup(config) first'};
@@ -283,9 +288,8 @@ var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRAT
 			+ '\n' +  prefix + 'attachments.id_attach as _aid, '
 			+ '\n' +  prefix + 'attachments.id_msg as _pid, '
 			+ '\n' +  prefix + 'attachments.id_member as _uid, '
-			+ '\n' +  prefix + 'attachments.attachment_type as _type, '
+			+ '\n' +  prefix + 'attachments.attachmentType as _type, '
 			+ '\n' +  prefix + 'attachments.filename as _filen, '
-			+ '\n' +  prefix + 'attachments.id_folder as _folderid, '
 			+ '\n' +  prefix + 'attachments.downloads as _downloads, '
 			+ '\n' +  prefix + 'attachments.width as _width, '
 			+ '\n' +  prefix + 'attachments.height as _height '
@@ -293,8 +297,11 @@ var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRAT
 			+ '\n' + 'WHERE (' + prefix + 'attachments.id_thumb > 0 OR ' + prefix + 'attachments.width = 0) '
 			+ '\n' +  'AND ' + prefix + 'attachments.id_member = 0 ' ;
 
+		Exporter.log('query: ' + query);
+
 		Exporter.connection.query(query,
 			function(err, rows) {
+				Exporter.log('getAttachmentsMap query result length: ' + rows.length);
 				if (err) {
 					Exporter.error(err);
 					return callback(err);
@@ -312,6 +319,7 @@ var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRAT
 					});
 				});
 				Exporter['_attachmentsMap_'] = map;
+				Exporter.log('getAttachmentsMap about to invoke callback');
 				callback(null, map);
 			});
 	};
@@ -333,19 +341,19 @@ var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRAT
 			+ '\n' +  prefix + 'messages.id_member as _uid, '
 			+ '\n' +  prefix + 'messages.subject as _title, '
 			+ '\n' +  prefix + 'messages.body as _content, '
-			+ '\n (' +  prefix + 'messages.poster_time * 1000) as _timestamp, '
-			+ '\n (' +  prefix + 'messages.modified_time * 1000) as _edited, '
-			+ '\n' +  prefix + 'topics.num_views as _viewcount, '
-			+ '\n' +  prefix + 'messages.poster_ip as _ip, '
-			+ '\n' +  prefix + 'messages.poster_email as _uemail, '
-			+ '\n' +  prefix + 'messages.poster_name as _guest, '
-			+ '\n' +  prefix + 'messages.approved as _approved, '
+			+ '\n (' +  prefix + 'messages.posterTime * 1000) as _timestamp, '
+			+ '\n (' +  prefix + 'messages.modifiedTime * 1000) as _edited, '
+			+ '\n' +  prefix + 'topics.numViews as _viewcount, '
+			+ '\n' +  prefix + 'messages.posterIP as _ip, '
+			+ '\n' +  prefix + 'messages.posterEmail as _uemail, '
+			+ '\n' +  prefix + 'messages.posterName as _guest, '
 			+ '\n' +  prefix + 'topics.locked as _locked, '
-			+ '\n' +  prefix + 'topics.is_sticky as _pinned '
+			+ '\n' +  prefix + 'topics.isSticky as _pinned '
 			+ '\n' +  'FROM ' + prefix + 'topics '
 			+ '\n' + 'JOIN ' + prefix + 'messages ON ' + prefix + 'messages.id_msg = ' + prefix + 'topics.id_first_msg '
 			+ '\n' + (start >= 0 && limit >= 0 ? ' LIMIT ' + start + ',' + limit : '');
 
+		Exporter.log('query: ' + query);
 
 		if (!Exporter.connection) {
 			err = {error: 'MySQL connection is not setup. Run setup(config) first'};
@@ -360,6 +368,7 @@ var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRAT
 			}
 			Exporter.connection.query(query,
 				function(err, rows) {
+					Exporter.log('getPaginatedTopics rows length: ' + rows.length);
 					var map = {};
 					if (err) {
 						Exporter.error(err);
@@ -395,14 +404,15 @@ var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRAT
 			+ '\n' +  prefix + 'messages.id_topic as _tid, '
 			+ '\n' +  prefix + 'messages.id_member as _uid, '
 			+ '\n' +  prefix + 'messages.body as _content, '
-			+ '\n (' +  prefix + 'messages.poster_time * 1000) as _timestamp, '
-			+ '\n (' +  prefix + 'messages.modified_time * 1000) as _edited, '
-			+ '\n' +  prefix + 'messages.poster_ip as _ip, '
-			+ '\n' +  prefix + 'messages.poster_name as _guest, '
-			+ '\n' +  prefix + 'messages.approved as _approved '
+			+ '\n (' +  prefix + 'messages.posterTime * 1000) as _timestamp, '
+			+ '\n (' +  prefix + 'messages.modifiedTime * 1000) as _edited, '
+			+ '\n' +  prefix + 'messages.posterIP as _ip, '
+			+ '\n' +  prefix + 'messages.posterName as _guest '
 			+ '\n FROM ' + prefix + 'messages '
 			+ '\n WHERE ' + prefix + 'messages.id_topic > 0 AND ' + prefix + 'messages.id_msg NOT IN (SELECT id_first_msg FROM ' + prefix + 'topics) '
 			+ '\n' + (start >= 0 && limit >= 0 ? ' LIMIT ' + start + ',' + limit : '');
+
+		Exporter.log('query: ' + query);
 
 		if (!Exporter.connection) {
 			err = {error: 'MySQL connection is not setup. Run setup(config) first'};
