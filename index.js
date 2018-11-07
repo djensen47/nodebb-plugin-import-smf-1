@@ -12,6 +12,7 @@ var logPrefix = '[nodebb-plugin-import-smf]';
 var MIGRATED_FOLDER = 'migrated';
 var ATTACHMENTS_ORIGINALS_DIR = path.join(__dirname, '/tmp/attachments/originals');
 var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRATED_FOLDER);
+var ATTACHMENTS_AVATARS_DIR = path.join(__dirname, '/tmp/attachments/avatars');
 
 (function(Exporter) {
 
@@ -257,10 +258,46 @@ var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRAT
 			});
 	};
 
+	
+	var copyAvatars = Exporter.copyAvatars = (callback) => {
+		var prefix = Exporter.config('prefix');
+		var query = 'SELECT ' 
+			+ '\n' + prefix + 'attachments.id_attach, '
+			+ '\n' + prefix + 'attachments.filename '
+			+ '\n' + 'FROM ' + prefix + 'attachments '
+			+ '\n' + 'WHERE ' + prefix + 'attachments.filename LIKE "avatar%"';
+
+		Exporter.connection.query(query, (err, rows) => {
+			Exporter.log(`Attempting to copy ${rows.length} files`);
+
+			let copied = 0;
+			let notCopied = 0;
+
+			rows.forEach( row => {
+				let id = row.id_attach;
+				let filename = row.filename;
+				var originalFilePath = path.join(ATTACHMENTS_ORIGINALS_DIR, '/'  + id);
+				var newFilePath = path.join(ATTACHMENTS_AVATARS_DIR, '/' + filename);
+
+				if (!fs.existsSync(newFilePath) && fs.existsSync(originalFilePath)) {
+					try {
+						fs.copySync(originalFilePath, newFilePath);
+					} catch (err) {
+						Exporter.log(`Error: ${err}`);
+						return callback(err);
+					}
+					copied++;
+				} else {
+					notCopied++;
+				}
+			});	
+			Exporter.log(`Copied ${copied} files and did not copy ${notCopied} files`);
+			return callback(null);
+		});
+	};
 
 	// this whole thing is crap
-	var copyAttachmentAndGetNewUrl = Exporter.copyDATAttachmentAndGetNewUrl = function (_aid, filename) {
-
+	var copyAttachmentAndGetNewUrl = Exporter.copyAttachmentAndGetNewUrl = function (_aid, filename) {
 		var baseUrl = '/uploads/_imported_attachments';
 		var newFileUrlPath = '/' + MIGRATED_FOLDER + '/' + _aid + '_' + encodeURIComponent(filename);
 
@@ -271,7 +308,11 @@ var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRAT
 
 		// TODO: wtf is that? sync copy? meh
 		if (!fs.existsSync(newFileFullFSPath) && fs.existsSync(originalFile)) {
-			fs.copySync(originalFile, newFileFullFSPath);
+			try {
+				fs.copySync(originalFile, newFileFullFSPath);
+			} catch (err) {
+				Exporter.log(err);
+			}
 		}
 		return baseUrl + newFileUrlPath;
 	};
@@ -301,8 +342,9 @@ var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRAT
 
 		Exporter.connection.query(query,
 			function(err, rows) {
-				Exporter.log('getAttachmentsMap query result length: ' + rows.length);
+				Exporter.log('getAttachmentsMap query result len: ' + rows.length);
 				if (err) {
+					Exporter.log(err);
 					Exporter.error(err);
 					return callback(err);
 				}
@@ -363,6 +405,8 @@ var ATTACHMENTS_MIGRATED_DIR = path.join(__dirname, '/tmp/attachments/' + MIGRAT
 
 		getAttachmentsMap(function (err, attachmentsMap) {
 			if (err) {
+				Exporter.log('err...');
+				Exporter.log(err);
 				Exporter.error(err);
 				return callback(err);
 			}
