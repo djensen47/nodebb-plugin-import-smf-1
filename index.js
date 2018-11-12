@@ -117,6 +117,7 @@ var ATTACHMENTS_AVATARS_DIR = path.join(__dirname, '/tmp/attachments/avatars');
 			+ '\n' + prefix + 'members.memberName as _username, '
 			+ '\n' + prefix + 'members.emailAddress as _email, '
 			+ '\n' + prefix + 'members.realName as _alternativeUsername, '
+			+ '\n' + prefix + 'members.realName as _fullname, '
 			+ '\n' + prefix + 'members.signature as _signature, '
 			+ '\n' + '(' + prefix + 'members.lastLogin * 1000) as _lastonline, '
 			+ '\n' + '(' + prefix + 'members.dateRegistered * 1000) as _joindate , '
