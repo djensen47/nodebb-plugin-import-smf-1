@@ -1,7 +1,7 @@
-nodebb-plugin-import-smf
-========================
+nodebb-plugin-import-smf-1
+==========================
 
-a SMF 2.0 forum exporter to be required by [nodebb-plugin-import](https://github.com/akhoury/nodebb-plugin-import).
+An SMF 1.0 forum exporter to be required by [nodebb-plugin-import](https://github.com/akhoury/nodebb-plugin-import).
 
 ### What is this?
 
